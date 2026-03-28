@@ -7,13 +7,24 @@ from PIL import Image
 
 @functions_framework.http
 def generate_stealth_link(request):
-    """
-    HTTP Cloud Function to generate a HiddenLink (Stealth QR).
-    Expected JSON: {"logo": "base64_string", "url": "string", "strength": float}
-    """
+    # Set CORS headers for the preflight request
+    if request.method == 'OPTIONS':
+        headers = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Max-Age': '3600'
+        }
+        return ('', 204, headers)
+
+    # Set CORS headers for the main request
+    headers = {
+        'Access-Control-Allow-Origin': '*'
+    }
+
     request_json = request.get_json(silent=True)
     if not request_json or 'logo' not in request_json or 'url' not in request_json:
-        return json.dumps({"error": "Missing logo or url"}), 400, {'Content-Type': 'application/json'}
+        return (json.dumps({"error": "Missing logo or url"}), 400, headers)
 
     logo_base64 = request_json['logo']
     target_url = request_json['url']
@@ -39,7 +50,6 @@ def generate_stealth_link(request):
         qr_img = qr_img.resize(logo.size, Image.Resampling.LANCZOS)
         
         # 4. Apply Stealth Blend (POC implementation)
-        # In production, this calls the Stable Diffusion / ControlNet API
         blended = Image.blend(logo, qr_img, alpha=strength)
         
         # 5. Return as Base64
@@ -47,11 +57,11 @@ def generate_stealth_link(request):
         blended.save(buffered, format="PNG")
         result_base64 = base64.b64encode(buffered.getvalue()).decode()
 
-        return json.dumps({
+        return (json.dumps({
             "status": "success",
-            "hidden_link": result_base64,
+            "stealthUrl": f"data:image/png;base64,{result_base64}",
             "message": "Stealth Logo Generated successfully (POC Mode)"
-        }), 200, {'Content-Type': 'application/json'}
+        }), 200, headers)
 
     except Exception as e:
-        return json.dumps({"error": str(e)}), 500, {'Content-Type': 'application/json'}
+        return (json.dumps({"error": str(e)}), 500, headers)
