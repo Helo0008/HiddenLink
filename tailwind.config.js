@@ -7,11 +7,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: {
-          slate: "#1e293b",
-          indigo: "#4f46e5",
-          electric: "#6366f1",
+        studio: {
+          warm: "#FAF9F6",
+          charcoal: "#1A1A1A",
+          emerald: "#065f46",
+          terracotta: "#9a3412",
         },
+      },
+      fontFamily: {
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
       },
     },
   },
