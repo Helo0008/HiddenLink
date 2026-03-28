@@ -15,6 +15,7 @@ const App: React.FC = () => {
   const [targetUrl, setTargetUrl] = useState('');
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [strength, setStrength] = useState(0.2);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<{ stealthUrl: string } | null>(null);
@@ -69,6 +70,7 @@ const App: React.FC = () => {
           const response = await axios.post(API_ENDPOINT, {
             url: targetUrl,
             logo: base64Logo,
+            strength: strength
           });
           setResult(response.data);
         } catch (err: any) {
@@ -184,6 +186,31 @@ const App: React.FC = () => {
                 </div>
               </div>
 
+              {/* Strength Slider */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <label className="text-sm font-semibold text-slate-300 flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-indigo-400" />
+                    Stealth Strength
+                  </label>
+                  <span className="text-xs font-mono text-indigo-400 bg-indigo-500/10 px-2 py-1 rounded">
+                    {Math.round(strength * 100)}%
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0.05"
+                  max="0.5"
+                  step="0.01"
+                  value={strength}
+                  onChange={(e) => setStrength(parseFloat(e.target.value))}
+                  className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                />
+                <p className="text-[10px] text-slate-500 italic">
+                  Higher strength increases scannability but makes the link more visible.
+                </p>
+              </div>
+
               {error && (
                 <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
@@ -255,7 +282,9 @@ const App: React.FC = () => {
                   </div>
                   <div className="flex gap-4">
                     <div className="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center overflow-hidden border border-slate-700">
-                      {logoPreview ? (
+                      {result ? (
+                        <img src={result.stealthUrl} alt="Stealth Logo" className="w-full h-full object-cover" />
+                      ) : logoPreview ? (
                         <img src={logoPreview} alt="Logo" className="w-full h-full object-cover" />
                       ) : (
                         <ShieldCheck className="w-6 h-6 text-indigo-500" />
